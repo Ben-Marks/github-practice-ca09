@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2a1660">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!--BUILD:HEAD-->
+<title>Flame Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Baloo+2:wght@500;700;800&display=swap">
+<style>
+/* Layout: one full-height column. HUD on top, the puzzle canvas fills the rest; screens and cards float above. */
+:root {
+  --ink: #1b1240;
+  --night: #2a1660;
+  --plum: #5a2a8c;
+  --lilac: #b9a6ff;
+  --gold: #ffce3a;
+  --flame: #ff5a2a;
+  --water: #2c9cff;
+  --paper: #fff8ec;
+  --font-display: 'Lilita One', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--paper);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button { font-family: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  background: radial-gradient(120% 70% at 50% 0%, #4a2492 0%, var(--night) 70%);
+  position: relative;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 8px;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
+}
+.icon-btn {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  border: 3px solid var(--ink);
+  background: var(--gold);
+  box-shadow: 0 4px 0 var(--ink);
+  display: grid; place-items: center;
+  padding: 0;
+  transition: transform .08s;
+}
+.icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.icon-btn svg { width: 24px; height: 24px; fill: var(--ink); stroke: var(--ink); }
+.icon-btn.alt { background: var(--lilac); }
+#btn-sound .off { display: none; }
+#btn-sound.muted .on { display: none; }
+#btn-sound.muted .off { display: block; }
+
+.hud-mid { min-width: 0; display: grid; gap: 4px; }
+.lvl { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+#lvl-num { font-family: var(--font-display); font-size: 22px; letter-spacing: .5px; color: var(--gold); text-shadow: 0 2px 0 var(--ink); white-space: nowrap; }
+#lvl-name { font-weight: 700; font-size: 15px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meter {
+  position: relative;
+  height: 14px;
+  border-radius: 8px;
+  border: 3px solid var(--ink);
+  background: #3b2470;
+  overflow: hidden;
+}
+#meter-fill {
+  position: absolute; inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #ffe45c, #ff9a1f 45%, var(--flame));
+  transition: transform .25s;
+}
+
+#stage {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 0 8px max(8px, env(safe-area-inset-bottom, 0px));
+}
+#cv {
+  display: block;
+  border-radius: 22px;
+  border: 4px solid var(--ink);
+  box-shadow: 0 8px 0 rgba(10, 4, 30, .55);
+  touch-action: none;
+}
+
+.hint {
+  position: absolute;
+  left: 50%; top: 14px;
+  transform: translate(-50%, -16px);
+  width: max-content;
+  max-width: min(320px, calc(100% - 48px));
+  padding: 8px 16px;
+  border-radius: 16px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s, transform .3s;
+}
+.hint.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* full screens */
+.screen {
+  position: absolute; inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: rgba(27, 18, 64, .72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.title-wrap { display: grid; justify-items: center; gap: 18px; text-align: center; }
+.logo {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 17vw, 92px);
+  line-height: .9;
+  margin: 0;
+  color: var(--gold);
+  -webkit-text-stroke: 4px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--ink);
+  transform: rotate(-4deg);
+}
+.logo span { display: block; color: var(--flame); }
+.logo-flame { width: 92px; height: 110px; animation: bob 1.6s ease-in-out infinite; }
+.tagline { margin: 0; font-size: 18px; font-weight: 700; max-width: 26ch; text-wrap: balance; }
+.btn {
+  min-width: 220px;
+  padding: 12px 28px 10px;
+  border-radius: 20px;
+  border: 4px solid var(--ink);
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: .5px;
+  box-shadow: 0 6px 0 var(--ink);
+  transition: transform .08s;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink); }
+.btn.big { animation: pulse 1.4s ease-in-out infinite; }
+.btn.ghost { background: var(--lilac); font-size: 22px; min-width: 180px; }
+.btn-col { display: grid; gap: 14px; justify-items: center; }
+
+.levels-wrap { display: grid; gap: 18px; justify-items: center; width: min(420px, 100%); }
+.levels-wrap h2 { margin: 0; font-family: var(--font-display); font-size: 40px; color: var(--gold); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+#level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; }
+.lvl-btn {
+  aspect-ratio: 1 / 1.15;
+  max-width: 100%;
+  border-radius: 16px;
+  border: 3px solid var(--ink);
+  background: linear-gradient(#5cc0ff, var(--water));
+  box-shadow: 0 5px 0 var(--ink);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+}
+.lvl-btn.rocky { background: linear-gradient(#ffb067, #ff6a2a); }
+.lvl-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.lvl-btn:disabled { background: #4a3a7a; color: #a596d6; cursor: default; box-shadow: 0 5px 0 var(--ink); transform: none; }
+.lvl-n { font-family: var(--font-display); font-size: 28px; line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+.lvl-stars { display: flex; gap: 1px; }
+.lvl-stars .star { width: 13px; height: 13px; }
+.star { fill: rgba(27, 18, 64, .45); stroke: var(--ink); stroke-width: 1.6; }
+.star.on { fill: var(--gold); }
+.lock { width: 18px; height: 18px; fill: #a596d6; stroke: #a596d6; }
+.legend { margin: 0; font-size: 15px; font-weight: 700; opacity: .85; text-align: center; }
+.legend b { color: var(--gold); }
+
+/* end-of-level card */
+.modal {
+  position: absolute; inset: 0;
+  z-index: 6;
+  display: grid; place-items: center;
+  padding: 24px 16px;
+  background: rgba(27, 18, 64, .5);
+}
+.card {
+  width: min(340px, 100%);
+  padding: 22px 20px 24px;
+  border-radius: 28px;
+  border: 4px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 10px 0 var(--ink);
+  display: grid; gap: 12px; justify-items: center;
+  text-align: center;
+  animation: pop .35s cubic-bezier(.2, 1.6, .5, 1);
+}
+.card h3 { margin: 0; font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--water); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); text-wrap: balance; }
+.modal.lose .card h3 { color: var(--flame); }
+.card p { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; max-width: 28ch; text-wrap: balance; }
+#modal-stars { display: flex; gap: 6px; }
+#modal-stars .star { width: 56px; height: 56px; stroke-width: 1.4; animation: pop .4s cubic-bezier(.2, 1.6, .5, 1) both; }
+#modal-stars .star:nth-child(2) { animation-delay: .12s; transform: translateY(-8px); }
+#modal-stars .star:nth-child(3) { animation-delay: .24s; }
+.card .btn { min-width: 0; width: 100%; }
+.card .btn.ghost { font-size: 20px; }
+
+@keyframes pulse { 50% { transform: scale(1.05); } }
+@keyframes bob { 50% { transform: translateY(-8px) rotate(3deg); } }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .btn.big, .logo-flame, .card, #modal-stars .star { animation: none; }
+}
+@media (max-height: 640px) {
+  .logo { font-size: 54px; }
+  .logo-flame { width: 64px; height: 76px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <button id="btn-menu" class="icon-btn alt" aria-label="Levels">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+    </button>
+    <div class="hud-mid">
+      <div class="lvl"><span id="lvl-num">Level 1</span><span id="lvl-name">First Splash</span></div>
+      <div class="meter" role="img" aria-label="How much fire is left"><div id="meter-fill"></div></div>
+    </div>
+    <button id="btn-sound" class="icon-btn alt" aria-label="Turn sound off">
+      <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+    <button id="btn-restart" class="icon-btn" aria-label="Restart level">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a7.5 7.5 0 1 1-7.1 5.1" fill="none" stroke-width="3" stroke-linecap="round"/><path d="M3 4.5l1.6 6 5.9-1.9z"/></svg>
+    </button>
+  </header>
+
+  <main id="stage">
+    <canvas id="cv" aria-label="Puzzle. Swipe the gold pins to release water, lava and rocks."></canvas>
+    <div id="hint" class="hint" aria-live="polite"></div>
+  </main>
+
+  <section id="scr-title" class="screen">
+    <div class="title-wrap">
+      <svg class="logo-flame" viewBox="0 0 92 110" aria-hidden="true">
+        <path d="M46 106C14 106 6 82 12 62c5-16 18-22 18-40 12 8 16 20 14 32 6-6 8-18 4-30 26 16 38 42 32 62-4 12-16 20-34 20z" fill="#ff4a2a" stroke="#1b1240" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M46 100c-18 0-24-12-20-26 3-9 10-12 12-22 8 6 10 14 8 22 5-3 7-10 6-16 12 10 16 22 13 30-3 8-9 12-19 12z" fill="#ff9a1f"/>
+        <path d="M46 96c-9 0-12-7-9-14 2-5 6-7 7-12 6 5 9 10 8 16-1 6-3 10-6 10z" fill="#ffe45c"/>
+        <ellipse cx="38" cy="78" rx="4" ry="5" fill="#fff"/><ellipse cx="54" cy="78" rx="4" ry="5" fill="#fff"/>
+        <circle cx="39" cy="79" r="2.4" fill="#1b1240"/><circle cx="55" cy="79" r="2.4" fill="#1b1240"/>
+        <path d="M40 88q6 5 12 0" fill="none" stroke="#1b1240" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <h1 class="logo">Flame<span>Out!</span></h1>
+      <p class="tagline">Pull the pins. Pour the water. Put out the fire.</p>
+      <div class="btn-col">
+        <button id="btn-play" class="btn big">Play</button>
+        <button id="btn-levels" class="btn ghost">Levels</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="scr-levels" class="screen" hidden>
+    <div class="levels-wrap">
+      <h2>Levels</h2>
+      <div id="level-grid"></div>
+      <p class="legend">Levels 1–5: water and lava. <b>Levels 6–10: rocks too.</b></p>
+      <button id="btn-back" class="btn ghost">Back</button>
+    </div>
+  </section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="modal-stars"></div>
+      <h3 id="modal-title">Fire’s out!</h3>
+      <p id="modal-sub"></p>
+      <button id="modal-primary" class="btn">Next level</button>
+      <button id="modal-secondary" class="btn ghost">Replay</button>
+    </div>
+  </div>
+</div>
+<!--BUILD:SCRIPTS-->
+<script src="engine.js"></script>
+<script src="levels.js"></script>
+<script src="game.js"></script>
+<!--/BUILD:SCRIPTS-->
+</body>
+</html>
