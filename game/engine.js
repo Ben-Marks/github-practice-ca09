@@ -1,6 +1,6 @@
 // Flame Out - particle simulation engine.
 // A falling-sand style grid: every cell is empty, solid, or one particle.
-// Runs in the browser (window.FlameEngine) and in Node (module.exports) for tests.
+// Runs in the browser (window.FlameEngine) and in Node (module.exports) for tools.
 (function (root) {
   'use strict';
 
@@ -8,25 +8,35 @@
   const H = 150;
   const CELL = 4; // logical pixels per cell
 
-  const EMPTY = 0, WALL = 1, PIN = 2, WATER = 3, LAVA = 4, STONE = 5, ROCK = 6;
-  const ZONE_FIRE = 1, ZONE_DRAIN = 2;
+  const EMPTY = 0, WALL = 1, PIN = 2, WATER = 3, LAVA = 4, STONE = 5, ROCK = 6, ICE = 7, MELT = 8;
+  // MELT is ice that is melting: it turns to water next step and starts melting the ice it touches.
+  // zone values: 0 none, 1 drain, 2 + k = fire k
+  const ZONE_DRAIN = 1, ZONE_FIRE0 = 2;
 
   const WATER_SPREAD = 4;
   const LAVA_SPREAD = 2;
   const QUIET_STEPS_TO_SETTLE = 90;
+  const HANDLE_CELLS = 4; // space a pin needs clear beyond its handle end
 
-  function mulberry32(seed) {
-    let a = seed >>> 0;
-    return function () {
-      a = (a + 0x6d2b79f5) >>> 0;
-      let t = a;
+  const KIND = { water: WATER, lava: LAVA, rock: ROCK, stone: STONE, ice: ICE };
+
+  function makeRng(state) {
+    const s = { a: state >>> 0 };
+    const f = function () {
+      s.a = (s.a + 0x6d2b79f5) >>> 0;
+      let t = s.a;
       t = Math.imul(t ^ (t >>> 15), t | 1);
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+    f.state = s;
+    return f;
   }
 
-  const KIND = { water: WATER, lava: LAVA, rock: ROCK, stone: STONE };
+  function firesOf(level) {
+    if (Array.isArray(level.fires)) return level.fires;
+    return level.fire ? [level.fire] : [];
+  }
 
   function createWorld(level, seed) {
     const n = W * H;
@@ -39,14 +49,14 @@
       shade: new Uint8Array(n),
       zone: new Uint8Array(n),
       frame: 0,
-      rand: mulberry32(seed || 1),
+      rand: makeRng(seed == null ? (level.seed || 1) : seed),
       events: [],
       pins: [],
-      progress: 0,
+      fires: [],
       totalWater: 0,
-      need: 0,
       waterCount: 0,
       lavaCount: 0,
+      iceCount: 0,
       quiet: 0,
       state: 'play', // play | won | lost
       reason: '',
@@ -69,7 +79,10 @@
       }
     });
 
-    if (level.fire) markZone(w, level.fire, ZONE_FIRE);
+    firesOf(level).forEach((f, k) => {
+      markZone(w, f, ZONE_FIRE0 + k);
+      w.fires.push({ x: f.x, y: f.y, w: f.w, h: f.h, share: f.need, progress: 0, need: 1 });
+    });
     for (const d of level.drains || []) markZone(w, d, ZONE_DRAIN);
 
     for (const f of level.fills || []) {
@@ -80,13 +93,14 @@
           const i = y * W + x;
           if (w.type[i] === EMPTY && w.zone[i] === 0) {
             w.type[i] = t;
-            if (t === WATER) w.totalWater++;
+            if (t === WATER || t === ICE) w.totalWater++;
           }
         }
       }
     }
-    w.need = Math.max(1, Math.ceil(w.totalWater * (level.need || 0.35)));
-    w.waterCount = w.totalWater;
+    const share = level.need || 0.35;
+    for (const f of w.fires) f.need = Math.max(1, Math.ceil(w.totalWater * (f.share || share)));
+    countParticles(w);
     return w;
   }
 
@@ -121,9 +135,34 @@
         if (inside(x, y) && w.type[y * W + x] === EMPTY) w.zone[y * W + x] = v;
   }
 
+  // The cells a pin must slide into just beyond its handle end.
+  function handleZone(p) {
+    if (p.dir === 'left') return { x: p.x - HANDLE_CELLS, y: p.y - 1, w: HANDLE_CELLS, h: p.h + 2 };
+    if (p.dir === 'right') return { x: p.x + p.w, y: p.y - 1, w: HANDLE_CELLS, h: p.h + 2 };
+    if (p.dir === 'up') return { x: p.x - 1, y: p.y - HANDLE_CELLS, w: p.w + 2, h: HANDLE_CELLS };
+    return { x: p.x - 1, y: p.y + p.h, w: p.w + 2, h: HANDLE_CELLS };
+  }
+
+  // A pin is locked while rock, stone, ice or another pin sits where its handle must go.
+  function isBlocked(w, id) {
+    const p = w.pins[id];
+    const z = handleZone(p);
+    for (let y = z.y; y < z.y + z.h; y++) {
+      for (let x = z.x; x < z.x + z.w; x++) {
+        if (!inside(x, y)) continue;
+        const i = y * W + x;
+        const t = w.type[i];
+        if (t === ROCK || t === STONE || t === ICE || t === MELT) return true;
+        if (t === PIN && w.pinOf[i] !== id) return true;
+      }
+    }
+    return false;
+  }
+
   function pullPin(w, id) {
     const p = w.pins[id];
     if (!p || p.pulled || w.state !== 'play') return false;
+    if (isBlocked(w, id)) return false;
     p.pulled = true;
     for (let y = p.y; y < p.y + p.h; y++) {
       for (let x = p.x; x < p.x + p.w; x++) {
@@ -136,16 +175,32 @@
     return true;
   }
 
+  function countParticles(w) {
+    const T = w.type;
+    let water = 0, lava = 0, ice = 0;
+    for (let i = 0; i < T.length; i++) {
+      const t = T[i];
+      if (t === WATER) water++;
+      else if (t === LAVA) lava++;
+      else if (t === ICE || t === MELT) ice++;
+    }
+    w.waterCount = water; w.lavaCount = lava; w.iceCount = ice;
+  }
+
+  function waterStillNeeded(w) {
+    let s = 0;
+    for (const f of w.fires) s += Math.max(0, f.need - f.progress);
+    return s;
+  }
+
   // ---- simulation ----
 
   function step(w) {
     const f = ++w.frame;
     const T = w.type, S = w.stamp, R = w.rand;
     let vertical = 0;
-    let water = 0, lava = 0;
 
     const isEmpty = (x, y) => inside(x, y) && T[y * W + x] === EMPTY;
-    const at = (x, y) => (inside(x, y) ? T[y * W + x] : WALL);
 
     // Move particle from i to j (j is empty or a swappable liquid).
     function move(i, j) {
@@ -165,14 +220,15 @@
       if (!z) return;
       const t = T[j];
       const x = j % W, y = (j / W) | 0;
-      if (z === ZONE_FIRE) {
+      if (z >= ZONE_FIRE0) {
+        const fire = w.fires[z - ZONE_FIRE0];
         if (t === WATER) {
           T[j] = EMPTY;
-          w.progress++;
-          if ((w.progress & 3) === 0) w.events.push({ e: 'douse', x, y });
+          fire.progress++;
+          if ((fire.progress & 3) === 0) w.events.push({ e: 'douse', x, y, fire: z - ZONE_FIRE0 });
         } else if (t === LAVA) {
           T[j] = EMPTY;
-          w.events.push({ e: 'flare', x, y });
+          w.events.push({ e: 'flare', x, y, fire: z - ZONE_FIRE0 });
           if (w.state === 'play') { w.state = 'lost'; w.reason = 'lava'; }
         } else if (t === STONE || t === ROCK) {
           // The fire crumbles anything solid that lands in it, so water can still get through.
@@ -187,26 +243,29 @@
       }
     }
 
-    // Water touching lava: lava cools to stone, water boils away.
+    // Lava touching water: lava cools to stone, water boils away.
+    // Lava touching ice: the ice starts melting, and the melt spreads through the whole block.
     function react(i, x, y, self) {
-      const other = self === WATER ? LAVA : WATER;
-      const nb = [[0, 1], [1, 0], [-1, 0], [0, -1]];
       for (let k = 0; k < 4; k++) {
-        const nx = x + nb[k][0], ny = y + nb[k][1];
+        const nx = x + (k === 1 ? 1 : k === 2 ? -1 : 0), ny = y + (k === 0 ? 1 : k === 3 ? -1 : 0);
         if (!inside(nx, ny)) continue;
         const j = ny * W + nx;
-        if (T[j] !== other) continue;
-        const li = self === LAVA ? i : j;
-        const wi = self === WATER ? i : j;
-        T[li] = STONE; S[li] = f;
-        T[wi] = EMPTY;
+        const o = T[j];
+        if (self === WATER) {
+          if (o !== LAVA) continue;
+          T[j] = STONE; S[j] = f; T[i] = EMPTY;
+        } else {
+          if (o === WATER) { T[i] = STONE; S[i] = f; T[j] = EMPTY; }
+          else if (o === ICE) { T[j] = MELT; S[j] = f; }
+          else continue;
+        }
         if (R() < 0.35) w.events.push({ e: 'steam', x: nx, y: ny });
         return true;
       }
       return false;
     }
 
-    function liquid(i, x, y, t, spread) {
+    function liquid(i, x, y, spread) {
       const first = R() < 0.5 ? -1 : 1;
       if (y + 1 < H) {
         const b = i + W;
@@ -220,7 +279,7 @@
         const d = s === 0 ? first : -first;
         if (isEmpty(x + d, y + 1) && isEmpty(x + d, y)) { move(i, (y + 1) * W + x + d); return 2; }
       }
-      let d = w.vx[i] || first;
+      const d = w.vx[i] || first;
       let cur = x;
       for (let s = 1; s <= spread; s++) {
         const nx = x + d * s;
@@ -258,14 +317,24 @@
         const x = ltr ? k : W - 1 - k;
         const i = y * W + x;
         const t = T[i];
-        if (t < WATER || S[i] === f) continue;
+        if (t < WATER || t === ICE || S[i] === f) continue;
         let r = 0;
+        if (t === MELT) {
+          T[i] = WATER; S[i] = f;
+          if (x > 0 && T[i - 1] === ICE) { T[i - 1] = MELT; S[i - 1] = f; }
+          if (x < W - 1 && T[i + 1] === ICE) { T[i + 1] = MELT; S[i + 1] = f; }
+          if (y > 0 && T[i - W] === ICE) { T[i - W] = MELT; S[i - W] = f; }
+          if (y < H - 1 && T[i + W] === ICE) { T[i + W] = MELT; S[i + W] = f; }
+          if (R() < 0.08) w.events.push({ e: 'steam', x, y });
+          vertical++;
+          continue;
+        }
         if (t === WATER) {
           if (react(i, x, y, WATER)) r = 2;
-          else r = liquid(i, x, y, WATER, WATER_SPREAD);
+          else r = liquid(i, x, y, WATER_SPREAD);
         } else if (t === LAVA) {
           if (react(i, x, y, LAVA)) r = 2;
-          else if (((f + x) & 1) === 0) r = liquid(i, x, y, LAVA, LAVA_SPREAD);
+          else if (((f + x) & 1) === 0) r = liquid(i, x, y, LAVA_SPREAD);
         } else {
           r = granular(i, x, y);
         }
@@ -273,30 +342,42 @@
       }
     }
 
-    for (let i = 0; i < T.length; i++) {
-      if (T[i] === WATER) water++;
-      else if (T[i] === LAVA) lava++;
-    }
-    w.waterCount = water;
-    w.lavaCount = lava;
+    countParticles(w);
     w.lastStepVertical = vertical;
     w.quiet = vertical > 0 ? 0 : w.quiet + 1;
 
     if (w.state === 'play') {
-      if (w.progress >= w.need) {
+      const still = waterStillNeeded(w);
+      if (still === 0) {
         w.state = 'won';
-      } else if (water + w.progress < w.need) {
+      } else if (w.waterCount + w.iceCount < still) {
         w.state = 'lost'; w.reason = 'water';
-      } else if (w.quiet > QUIET_STEPS_TO_SETTLE && w.pins.every((p) => p.pulled)) {
+      } else if (w.quiet > QUIET_STEPS_TO_SETTLE && w.pins.every((p) => p.pulled || isBlocked(w, p.id))) {
         w.state = 'lost'; w.reason = 'stuck';
       }
     }
   }
 
+  // Exact copy of a world, used by the level solver to branch.
+  function cloneWorld(w) {
+    const c = Object.assign({}, w);
+    c.type = w.type.slice();
+    c.pinOf = w.pinOf.slice();
+    c.stamp = w.stamp.slice();
+    c.vx = w.vx.slice();
+    c.shade = w.shade.slice();
+    c.rand = makeRng(0);
+    c.rand.state.a = w.rand.state.a;
+    c.events = [];
+    c.pins = w.pins.map((p) => Object.assign({}, p));
+    c.fires = w.fires.map((p) => Object.assign({}, p));
+    return c;
+  }
+
   const api = {
     W, H, CELL,
-    EMPTY, WALL, PIN, WATER, LAVA, STONE, ROCK, ZONE_FIRE, ZONE_DRAIN,
-    createWorld, step, pullPin,
+    EMPTY, WALL, PIN, WATER, LAVA, STONE, ROCK, ICE, MELT, ZONE_DRAIN, ZONE_FIRE0,
+    createWorld, step, pullPin, isBlocked, handleZone, cloneWorld, firesOf, waterStillNeeded,
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

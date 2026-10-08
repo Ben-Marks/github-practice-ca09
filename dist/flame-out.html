@@ -53,10 +53,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 .hud {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px 8px;
+  gap: 8px;
+  padding: 10px 12px 8px;
   padding-top: max(10px, env(safe-area-inset-top, 0px));
 }
 .icon-btn {
@@ -72,9 +72,9 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 .icon-btn svg { width: 24px; height: 24px; fill: var(--ink); stroke: var(--ink); }
 .icon-btn.alt { background: var(--lilac); }
-#btn-sound .off { display: none; }
-#btn-sound.muted .on { display: none; }
-#btn-sound.muted .off { display: block; }
+#btn-sound .off, #btn-music .off { display: none; }
+#btn-sound.muted .on, #btn-music.muted .on { display: none; }
+#btn-sound.muted .off, #btn-music.muted .off { display: block; }
 
 .hud-mid { min-width: 0; display: grid; gap: 4px; }
 .lvl { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
@@ -178,9 +178,15 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .btn.ghost { background: var(--lilac); font-size: 22px; min-width: 180px; }
 .btn-col { display: grid; gap: 14px; justify-items: center; }
 
-.levels-wrap { display: grid; gap: 18px; justify-items: center; width: min(420px, 100%); }
+.levels-wrap { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; justify-items: center; width: min(440px, 100%); height: 100%; min-height: 0; }
+#scr-levels { place-items: stretch center; padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); }
 .levels-wrap h2 { margin: 0; font-family: var(--font-display); font-size: 40px; color: var(--gold); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
-#level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; }
+#level-grid { width: 100%; min-height: 0; overflow-y: auto; display: grid; gap: 10px; align-content: start; padding: 4px 4px 12px; -webkit-overflow-scrolling: touch; }
+.world-levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 8px; }
+.world-head { display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: baseline; padding: 6px 2px 0; }
+.world-n { font-family: var(--font-display); font-size: 22px; color: var(--gold); text-shadow: 0 2px 0 var(--ink); }
+.world-name { font-weight: 800; font-size: 18px; }
+.world-what { grid-column: 1 / -1; font-size: 14px; font-weight: 600; opacity: .8; }
 .lvl-btn {
   aspect-ratio: 1 / 1.15;
   max-width: 100%;
@@ -195,7 +201,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   gap: 2px;
   padding: 4px 2px;
 }
-.lvl-btn.rocky { background: linear-gradient(#ffb067, #ff6a2a); }
+.lvl-btn.w2 { background: linear-gradient(#c2a58c, #8d6e57); }
+.lvl-btn.w3 { background: linear-gradient(#ffd56b, #e59a12); }
+.lvl-btn.w4 { background: linear-gradient(#ffb067, #ff5a2a); }
+.lvl-btn.w5 { background: linear-gradient(#bdf0ff, #5fb8f0); }
 .lvl-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
 .lvl-btn:disabled { background: #4a3a7a; color: #a596d6; cursor: default; box-shadow: 0 5px 0 var(--ink); transform: none; }
 .lvl-n { font-family: var(--font-display); font-size: 28px; line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
@@ -237,11 +246,23 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .card .btn { min-width: 0; width: 100%; }
 .card .btn.ghost { font-size: 20px; }
 
+.adbreak { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px 16px; background: rgba(15, 9, 38, .92); }
+.ad-card { width: min(340px, 100%); display: grid; gap: 14px; justify-items: center; text-align: center; }
+.ad-label { margin: 0; font-family: var(--font-display); font-size: 30px; color: var(--gold); text-shadow: 0 3px 0 var(--ink); }
+.ad-slot { width: 100%; aspect-ratio: 4 / 3; max-width: 100%; border-radius: 20px; border: 3px dashed var(--lilac); display: grid; place-items: center; align-content: center; gap: 6px; color: var(--lilac); font-weight: 700; }
+#ad-count { font-family: var(--font-display); font-size: 56px; color: var(--paper); line-height: 1; }
+.ad-note { margin: 0; font-size: 14px; opacity: .75; max-width: 30ch; }
+.btn:disabled { opacity: .55; animation: none; }
 @keyframes pulse { 50% { transform: scale(1.05); } }
 @keyframes bob { 50% { transform: translateY(-8px) rotate(3deg); } }
 @keyframes pop { from { transform: scale(.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .btn.big, .logo-flame, .card, #modal-stars .star { animation: none; }
+}
+@media (max-width: 360px) {
+  .icon-btn { width: 38px; height: 38px; border-radius: 12px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  #lvl-name { display: none; }
 }
 @media (max-height: 640px) {
   .logo { font-size: 54px; }
@@ -259,7 +280,11 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       <div class="lvl"><span id="lvl-num">Level 1</span><span id="lvl-name">First Splash</span></div>
       <div class="meter" role="img" aria-label="How much fire is left"><div id="meter-fill"></div></div>
     </div>
-    <button id="btn-sound" class="icon-btn alt" aria-label="Turn sound off">
+    <button id="btn-music" class="icon-btn alt" aria-label="Turn music off">
+      <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5l11-2v12.5" fill="none" stroke-width="2.4" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="3"/><circle cx="17.5" cy="15.5" r="3"/></svg>
+      <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5l11-2v12.5" fill="none" stroke-width="2.4" stroke-linejoin="round" opacity=".45"/><circle cx="6.5" cy="17.5" r="3" opacity=".45"/><circle cx="17.5" cy="15.5" r="3" opacity=".45"/><path d="M3 3l18 18" fill="none" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </button>
+    <button id="btn-sound" class="icon-btn alt" aria-label="Turn sound effects off">
       <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="2.2" stroke-linecap="round"/></svg>
       <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
@@ -296,7 +321,6 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     <div class="levels-wrap">
       <h2>Levels</h2>
       <div id="level-grid"></div>
-      <p class="legend">Levels 1–5: water and lava. <b>Levels 6–10: rocks too.</b></p>
       <button id="btn-back" class="btn ghost">Back</button>
     </div>
   </section>
@@ -311,10 +335,18 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     </div>
   </div>
 </div>
+<div id="adbreak" class="adbreak" hidden>
+  <div class="ad-card" role="dialog" aria-modal="true" aria-labelledby="ad-label">
+    <p id="ad-label" class="ad-label">Ad break</p>
+    <div class="ad-slot"><span id="ad-count">5</span><span>Ad plays here</span></div>
+    <p class="ad-note">Placeholder: once an ad network is connected, a real ad shows here every 3 levels.</p>
+    <button id="ad-continue" class="btn" disabled>Continue in 5</button>
+  </div>
+</div>
 <script>
 // Flame Out - particle simulation engine.
 // A falling-sand style grid: every cell is empty, solid, or one particle.
-// Runs in the browser (window.FlameEngine) and in Node (module.exports) for tests.
+// Runs in the browser (window.FlameEngine) and in Node (module.exports) for tools.
 (function (root) {
   'use strict';
 
@@ -322,25 +354,35 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   const H = 150;
   const CELL = 4; // logical pixels per cell
 
-  const EMPTY = 0, WALL = 1, PIN = 2, WATER = 3, LAVA = 4, STONE = 5, ROCK = 6;
-  const ZONE_FIRE = 1, ZONE_DRAIN = 2;
+  const EMPTY = 0, WALL = 1, PIN = 2, WATER = 3, LAVA = 4, STONE = 5, ROCK = 6, ICE = 7, MELT = 8;
+  // MELT is ice that is melting: it turns to water next step and starts melting the ice it touches.
+  // zone values: 0 none, 1 drain, 2 + k = fire k
+  const ZONE_DRAIN = 1, ZONE_FIRE0 = 2;
 
   const WATER_SPREAD = 4;
   const LAVA_SPREAD = 2;
   const QUIET_STEPS_TO_SETTLE = 90;
+  const HANDLE_CELLS = 4; // space a pin needs clear beyond its handle end
 
-  function mulberry32(seed) {
-    let a = seed >>> 0;
-    return function () {
-      a = (a + 0x6d2b79f5) >>> 0;
-      let t = a;
+  const KIND = { water: WATER, lava: LAVA, rock: ROCK, stone: STONE, ice: ICE };
+
+  function makeRng(state) {
+    const s = { a: state >>> 0 };
+    const f = function () {
+      s.a = (s.a + 0x6d2b79f5) >>> 0;
+      let t = s.a;
       t = Math.imul(t ^ (t >>> 15), t | 1);
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+    f.state = s;
+    return f;
   }
 
-  const KIND = { water: WATER, lava: LAVA, rock: ROCK, stone: STONE };
+  function firesOf(level) {
+    if (Array.isArray(level.fires)) return level.fires;
+    return level.fire ? [level.fire] : [];
+  }
 
   function createWorld(level, seed) {
     const n = W * H;
@@ -353,14 +395,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       shade: new Uint8Array(n),
       zone: new Uint8Array(n),
       frame: 0,
-      rand: mulberry32(seed || 1),
+      rand: makeRng(seed == null ? (level.seed || 1) : seed),
       events: [],
       pins: [],
-      progress: 0,
+      fires: [],
       totalWater: 0,
-      need: 0,
       waterCount: 0,
       lavaCount: 0,
+      iceCount: 0,
       quiet: 0,
       state: 'play', // play | won | lost
       reason: '',
@@ -383,7 +425,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       }
     });
 
-    if (level.fire) markZone(w, level.fire, ZONE_FIRE);
+    firesOf(level).forEach((f, k) => {
+      markZone(w, f, ZONE_FIRE0 + k);
+      w.fires.push({ x: f.x, y: f.y, w: f.w, h: f.h, share: f.need, progress: 0, need: 1 });
+    });
     for (const d of level.drains || []) markZone(w, d, ZONE_DRAIN);
 
     for (const f of level.fills || []) {
@@ -394,13 +439,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
           const i = y * W + x;
           if (w.type[i] === EMPTY && w.zone[i] === 0) {
             w.type[i] = t;
-            if (t === WATER) w.totalWater++;
+            if (t === WATER || t === ICE) w.totalWater++;
           }
         }
       }
     }
-    w.need = Math.max(1, Math.ceil(w.totalWater * (level.need || 0.35)));
-    w.waterCount = w.totalWater;
+    const share = level.need || 0.35;
+    for (const f of w.fires) f.need = Math.max(1, Math.ceil(w.totalWater * (f.share || share)));
+    countParticles(w);
     return w;
   }
 
@@ -435,9 +481,34 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
         if (inside(x, y) && w.type[y * W + x] === EMPTY) w.zone[y * W + x] = v;
   }
 
+  // The cells a pin must slide into just beyond its handle end.
+  function handleZone(p) {
+    if (p.dir === 'left') return { x: p.x - HANDLE_CELLS, y: p.y - 1, w: HANDLE_CELLS, h: p.h + 2 };
+    if (p.dir === 'right') return { x: p.x + p.w, y: p.y - 1, w: HANDLE_CELLS, h: p.h + 2 };
+    if (p.dir === 'up') return { x: p.x - 1, y: p.y - HANDLE_CELLS, w: p.w + 2, h: HANDLE_CELLS };
+    return { x: p.x - 1, y: p.y + p.h, w: p.w + 2, h: HANDLE_CELLS };
+  }
+
+  // A pin is locked while rock, stone, ice or another pin sits where its handle must go.
+  function isBlocked(w, id) {
+    const p = w.pins[id];
+    const z = handleZone(p);
+    for (let y = z.y; y < z.y + z.h; y++) {
+      for (let x = z.x; x < z.x + z.w; x++) {
+        if (!inside(x, y)) continue;
+        const i = y * W + x;
+        const t = w.type[i];
+        if (t === ROCK || t === STONE || t === ICE || t === MELT) return true;
+        if (t === PIN && w.pinOf[i] !== id) return true;
+      }
+    }
+    return false;
+  }
+
   function pullPin(w, id) {
     const p = w.pins[id];
     if (!p || p.pulled || w.state !== 'play') return false;
+    if (isBlocked(w, id)) return false;
     p.pulled = true;
     for (let y = p.y; y < p.y + p.h; y++) {
       for (let x = p.x; x < p.x + p.w; x++) {
@@ -450,16 +521,32 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     return true;
   }
 
+  function countParticles(w) {
+    const T = w.type;
+    let water = 0, lava = 0, ice = 0;
+    for (let i = 0; i < T.length; i++) {
+      const t = T[i];
+      if (t === WATER) water++;
+      else if (t === LAVA) lava++;
+      else if (t === ICE || t === MELT) ice++;
+    }
+    w.waterCount = water; w.lavaCount = lava; w.iceCount = ice;
+  }
+
+  function waterStillNeeded(w) {
+    let s = 0;
+    for (const f of w.fires) s += Math.max(0, f.need - f.progress);
+    return s;
+  }
+
   // ---- simulation ----
 
   function step(w) {
     const f = ++w.frame;
     const T = w.type, S = w.stamp, R = w.rand;
     let vertical = 0;
-    let water = 0, lava = 0;
 
     const isEmpty = (x, y) => inside(x, y) && T[y * W + x] === EMPTY;
-    const at = (x, y) => (inside(x, y) ? T[y * W + x] : WALL);
 
     // Move particle from i to j (j is empty or a swappable liquid).
     function move(i, j) {
@@ -479,14 +566,15 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       if (!z) return;
       const t = T[j];
       const x = j % W, y = (j / W) | 0;
-      if (z === ZONE_FIRE) {
+      if (z >= ZONE_FIRE0) {
+        const fire = w.fires[z - ZONE_FIRE0];
         if (t === WATER) {
           T[j] = EMPTY;
-          w.progress++;
-          if ((w.progress & 3) === 0) w.events.push({ e: 'douse', x, y });
+          fire.progress++;
+          if ((fire.progress & 3) === 0) w.events.push({ e: 'douse', x, y, fire: z - ZONE_FIRE0 });
         } else if (t === LAVA) {
           T[j] = EMPTY;
-          w.events.push({ e: 'flare', x, y });
+          w.events.push({ e: 'flare', x, y, fire: z - ZONE_FIRE0 });
           if (w.state === 'play') { w.state = 'lost'; w.reason = 'lava'; }
         } else if (t === STONE || t === ROCK) {
           // The fire crumbles anything solid that lands in it, so water can still get through.
@@ -501,26 +589,29 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       }
     }
 
-    // Water touching lava: lava cools to stone, water boils away.
+    // Lava touching water: lava cools to stone, water boils away.
+    // Lava touching ice: the ice starts melting, and the melt spreads through the whole block.
     function react(i, x, y, self) {
-      const other = self === WATER ? LAVA : WATER;
-      const nb = [[0, 1], [1, 0], [-1, 0], [0, -1]];
       for (let k = 0; k < 4; k++) {
-        const nx = x + nb[k][0], ny = y + nb[k][1];
+        const nx = x + (k === 1 ? 1 : k === 2 ? -1 : 0), ny = y + (k === 0 ? 1 : k === 3 ? -1 : 0);
         if (!inside(nx, ny)) continue;
         const j = ny * W + nx;
-        if (T[j] !== other) continue;
-        const li = self === LAVA ? i : j;
-        const wi = self === WATER ? i : j;
-        T[li] = STONE; S[li] = f;
-        T[wi] = EMPTY;
+        const o = T[j];
+        if (self === WATER) {
+          if (o !== LAVA) continue;
+          T[j] = STONE; S[j] = f; T[i] = EMPTY;
+        } else {
+          if (o === WATER) { T[i] = STONE; S[i] = f; T[j] = EMPTY; }
+          else if (o === ICE) { T[j] = MELT; S[j] = f; }
+          else continue;
+        }
         if (R() < 0.35) w.events.push({ e: 'steam', x: nx, y: ny });
         return true;
       }
       return false;
     }
 
-    function liquid(i, x, y, t, spread) {
+    function liquid(i, x, y, spread) {
       const first = R() < 0.5 ? -1 : 1;
       if (y + 1 < H) {
         const b = i + W;
@@ -534,7 +625,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
         const d = s === 0 ? first : -first;
         if (isEmpty(x + d, y + 1) && isEmpty(x + d, y)) { move(i, (y + 1) * W + x + d); return 2; }
       }
-      let d = w.vx[i] || first;
+      const d = w.vx[i] || first;
       let cur = x;
       for (let s = 1; s <= spread; s++) {
         const nx = x + d * s;
@@ -572,14 +663,24 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
         const x = ltr ? k : W - 1 - k;
         const i = y * W + x;
         const t = T[i];
-        if (t < WATER || S[i] === f) continue;
+        if (t < WATER || t === ICE || S[i] === f) continue;
         let r = 0;
+        if (t === MELT) {
+          T[i] = WATER; S[i] = f;
+          if (x > 0 && T[i - 1] === ICE) { T[i - 1] = MELT; S[i - 1] = f; }
+          if (x < W - 1 && T[i + 1] === ICE) { T[i + 1] = MELT; S[i + 1] = f; }
+          if (y > 0 && T[i - W] === ICE) { T[i - W] = MELT; S[i - W] = f; }
+          if (y < H - 1 && T[i + W] === ICE) { T[i + W] = MELT; S[i + W] = f; }
+          if (R() < 0.08) w.events.push({ e: 'steam', x, y });
+          vertical++;
+          continue;
+        }
         if (t === WATER) {
           if (react(i, x, y, WATER)) r = 2;
-          else r = liquid(i, x, y, WATER, WATER_SPREAD);
+          else r = liquid(i, x, y, WATER_SPREAD);
         } else if (t === LAVA) {
           if (react(i, x, y, LAVA)) r = 2;
-          else if (((f + x) & 1) === 0) r = liquid(i, x, y, LAVA, LAVA_SPREAD);
+          else if (((f + x) & 1) === 0) r = liquid(i, x, y, LAVA_SPREAD);
         } else {
           r = granular(i, x, y);
         }
@@ -587,292 +688,56 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       }
     }
 
-    for (let i = 0; i < T.length; i++) {
-      if (T[i] === WATER) water++;
-      else if (T[i] === LAVA) lava++;
-    }
-    w.waterCount = water;
-    w.lavaCount = lava;
+    countParticles(w);
     w.lastStepVertical = vertical;
     w.quiet = vertical > 0 ? 0 : w.quiet + 1;
 
     if (w.state === 'play') {
-      if (w.progress >= w.need) {
+      const still = waterStillNeeded(w);
+      if (still === 0) {
         w.state = 'won';
-      } else if (water + w.progress < w.need) {
+      } else if (w.waterCount + w.iceCount < still) {
         w.state = 'lost'; w.reason = 'water';
-      } else if (w.quiet > QUIET_STEPS_TO_SETTLE && w.pins.every((p) => p.pulled)) {
+      } else if (w.quiet > QUIET_STEPS_TO_SETTLE && w.pins.every((p) => p.pulled || isBlocked(w, p.id))) {
         w.state = 'lost'; w.reason = 'stuck';
       }
     }
   }
 
+  // Exact copy of a world, used by the level solver to branch.
+  function cloneWorld(w) {
+    const c = Object.assign({}, w);
+    c.type = w.type.slice();
+    c.pinOf = w.pinOf.slice();
+    c.stamp = w.stamp.slice();
+    c.vx = w.vx.slice();
+    c.shade = w.shade.slice();
+    c.rand = makeRng(0);
+    c.rand.state.a = w.rand.state.a;
+    c.events = [];
+    c.pins = w.pins.map((p) => Object.assign({}, p));
+    c.fires = w.fires.map((p) => Object.assign({}, p));
+    return c;
+  }
+
   const api = {
     W, H, CELL,
-    EMPTY, WALL, PIN, WATER, LAVA, STONE, ROCK, ZONE_FIRE, ZONE_DRAIN,
-    createWorld, step, pullPin,
+    EMPTY, WALL, PIN, WATER, LAVA, STONE, ROCK, ICE, MELT, ZONE_DRAIN, ZONE_FIRE0,
+    createWorld, step, pullPin, isBlocked, handleZone, cloneWorld, firesOf, waterStillNeeded,
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.FlameEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
-// Flame Out - level data. Levels are drawn on a 90 x 150 cell layout, then shifted
-// right by MARGIN so pin handles near the edges stay on the 100-cell-wide grid.
-// walls: [x, y, w, h] rects. lines: [x1, y1, x2, y2, radius] ramps.
-// pins: { x, y, w, h, dir } where dir is the way you swipe to pull it out.
-// fills: { t: 'water' | 'lava' | 'rock', x, y, w, h } (only empty cells are filled).
-// fire: zone that water puts out and lava makes worse. drains: zones that swallow liquid.
-// need: share of all water that must reach the fire.
+// Flame Out - the 50 levels. Generated by tools/build-levels.js from solver-checked candidates.
+// Do not edit by hand; regenerate instead. Every player gets exactly these levels.
 (function (root) {
   'use strict';
-
-  // Open-topped fire pit with the fire zone in its lower half.
-  function firePit(x0, x1, top) {
-    top = top || 112;
-    return {
-      walls: [[x0 - 3, top, 3, 150 - top], [x1, top, 3, 150 - top], [x0 - 3, 146, x1 - x0 + 6, 4]],
-      fire: { x: x0, y: 128, w: x1 - x0, h: 18 },
-    };
-  }
-
-  // Open-bottomed tube; a pin usually closes the bottom.
-  function tube(x0, x1, y0, y1) {
-    return [[x0 - 3, y0, 3, y1 - y0], [x1, y0, 3, y1 - y0]];
-  }
-
-  function merge(base, extra) {
-    const out = { walls: [], lines: [], pins: [], fills: [], drains: [] };
-    for (const part of [base, extra]) {
-      for (const k of Object.keys(part)) {
-        if (Array.isArray(part[k])) out[k] = (out[k] || []).concat(part[k]);
-        else out[k] = part[k];
-      }
-    }
-    return out;
-  }
-
-  const MARGIN = 5;
-  const LEVELS = [];
-
-  // 1 - one pin, straight down.
-  LEVELS.push(merge(firePit(30, 60), {
-    name: 'First Splash',
-    hint: 'Swipe the gold pin to pour the water on the fire.',
-    walls: tube(33, 57, 20, 78),
-    pins: [{ x: 24, y: 72, w: 40, h: 2, dir: 'left' }],
-    fills: [{ t: 'water', x: 33, y: 30, w: 24, h: 42 }],
-    need: 0.35,
-  }));
-
-  // 2 - pick the right pin.
-  LEVELS.push(merge(firePit(32, 58), {
-    name: 'Hot or Not',
-    hint: 'Lava makes the fire bigger. Only pull the water!',
-    walls: tube(12, 34, 18, 66).concat(tube(56, 78, 18, 66), [[4, 62, 3, 16], [83, 62, 3, 16]]),
-    lines: [[6, 76, 31, 104, 1.6], [84, 76, 59, 104, 1.6]],
-    pins: [
-      { x: 4, y: 60, w: 34, h: 2, dir: 'left' },
-      { x: 52, y: 60, w: 34, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 12, y: 24, w: 22, h: 36 },
-      { t: 'lava', x: 56, y: 24, w: 22, h: 36 },
-    ],
-    need: 0.35,
-  }));
-
-  // 3 - cool the lava first.
-  LEVELS.push(merge(firePit(30, 60), {
-    name: 'Cool It Down',
-    hint: 'Water turns lava into stone. Cool it before it drops!',
-    walls: tube(30, 60, 10, 94),
-    pins: [
-      { x: 22, y: 46, w: 46, h: 2, dir: 'right' },
-      { x: 22, y: 86, w: 46, h: 2, dir: 'left' },
-    ],
-    fills: [
-      { t: 'water', x: 30, y: 14, w: 30, h: 32 },
-      { t: 'lava', x: 30, y: 70, w: 30, h: 16 },
-    ],
-    need: 0.3,
-  }));
-
-  // 4 - two doors, one leads to the drain.
-  LEVELS.push(merge(firePit(58, 84), {
-    name: 'Wrong Turn',
-    hint: 'Pick the door that leads to the fire.',
-    walls: tube(36, 54, 8, 44).concat(
-      [[27, 46, 3, 16], [60, 46, 3, 16], [27, 74, 36, 3]],
-      [[27, 77, 3, 70], [-3, 77, 3, 73], [-3, 146, 33, 4]],
-      tube(67, 84, 8, 44)
-    ),
-    drains: [{ x: 0, y: 126, w: 27, h: 20 }],
-    pins: [
-      { x: 30, y: 40, w: 30, h: 2, dir: 'left' },
-      { x: 28, y: 38, w: 2, h: 36, dir: 'up' },
-      { x: 60, y: 38, w: 2, h: 36, dir: 'up' },
-      { x: 63, y: 40, w: 27, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 36, y: 12, w: 18, h: 28 },
-      { t: 'lava', x: 67, y: 16, w: 17, h: 24 },
-    ],
-    need: 0.35,
-  }));
-
-  // 5 - two tanks of water are needed to cool a big lava pool.
-  LEVELS.push(merge(firePit(30, 60), {
-    name: 'Steam Bath',
-    hint: 'That lava pool is big. One tank of water is not enough.',
-    walls: tube(30, 60, 66, 106).concat(
-      tube(6, 26, 6, 40), tube(64, 84, 6, 40), tube(37, 53, 6, 46),
-      [[0, 28, 3, 18], [87, 28, 3, 18]]
-    ),
-    lines: [[2, 44, 33, 62, 1.6], [88, 44, 57, 62, 1.6]],
-    pins: [
-      { x: 0, y: 36, w: 31, h: 2, dir: 'left' },
-      { x: 59, y: 36, w: 31, h: 2, dir: 'right' },
-      { x: 32, y: 42, w: 26, h: 2, dir: 'right' },
-      { x: 22, y: 100, w: 46, h: 2, dir: 'left' },
-    ],
-    fills: [
-      { t: 'water', x: 6, y: 10, w: 20, h: 26 },
-      { t: 'water', x: 64, y: 10, w: 20, h: 26 },
-      { t: 'lava', x: 37, y: 16, w: 16, h: 26 },
-      { t: 'lava', x: 30, y: 76, w: 30, h: 24 },
-    ],
-    need: 0.25,
-  }));
-
-  // 6 - rocks fill the hole so water can cross.
-  LEVELS.push(merge(firePit(58, 84), {
-    name: 'Mind the Gap',
-    hint: 'Rocks can fill holes. Water falls right through them.',
-    walls: tube(6, 28, 6, 44).concat(
-      tube(36, 46, 14, 44),
-      [[0, 34, 3, 20], [33, 55, 3, 24], [46, 57, 3, 22], [33, 76, 16, 3]]
-    ),
-    lines: [[2, 50, 34, 55, 1.6], [48, 57, 66, 60, 1.6]],
-    drains: [{ x: 36, y: 68, w: 10, h: 8 }],
-    pins: [
-      { x: 0, y: 40, w: 31, h: 2, dir: 'left' },
-      { x: 31, y: 42, w: 22, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 6, y: 10, w: 22, h: 30 },
-      { t: 'rock', x: 36, y: 18, w: 10, h: 24 },
-    ],
-    need: 0.3,
-  }));
-
-  // 7 - fill the gap, cool the lava, then open the floor.
-  LEVELS.push(merge(firePit(58, 84), {
-    name: 'Stone Cold',
-    hint: 'Three steps. Think before you pull!',
-    walls: tube(6, 28, 6, 44).concat(
-      tube(36, 46, 14, 44),
-      [[0, 34, 3, 20], [33, 55, 3, 24], [46, 57, 3, 22], [33, 76, 16, 3]],
-      tube(60, 82, 64, 106)
-    ),
-    lines: [[2, 50, 34, 55, 1.6], [48, 57, 68, 61, 1.6]],
-    drains: [{ x: 36, y: 68, w: 10, h: 8 }],
-    pins: [
-      { x: 0, y: 40, w: 31, h: 2, dir: 'left' },
-      { x: 31, y: 42, w: 22, h: 2, dir: 'right' },
-      { x: 54, y: 100, w: 36, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 6, y: 10, w: 22, h: 30 },
-      { t: 'rock', x: 36, y: 18, w: 10, h: 24 },
-      { t: 'lava', x: 60, y: 84, w: 22, h: 16 },
-    ],
-    need: 0.3,
-  }));
-
-  // 8 - rocks sink and push the water over the rim.
-  LEVELS.push(merge(firePit(62, 86), {
-    name: 'Sink or Swim',
-    hint: 'Heavy rocks sink. What happens to the water?',
-    walls: [[24, 40, 3, 53], [60, 60, 3, 33], [24, 90, 39, 3]].concat(
-      tube(32, 46, 8, 40), tube(56, 68, 8, 40)
-    ),
-    pins: [
-      { x: 25, y: 38, w: 23, h: 2, dir: 'left' },
-      { x: 52, y: 38, w: 24, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 27, y: 62, w: 33, h: 28 },
-      { t: 'rock', x: 32, y: 12, w: 14, h: 26 },
-      { t: 'lava', x: 56, y: 14, w: 12, h: 24 },
-    ],
-    need: 0.18,
-  }));
-
-  // 9 - cool the lava before the rocks push it over.
-  LEVELS.push(merge(firePit(62, 86), {
-    name: 'Overflow',
-    hint: 'Whatever is on top spills over first.',
-    walls: tube(4, 24, 4, 44).concat(
-      tube(30, 44, 6, 46),
-      [[0, 34, 2, 16], [27, 58, 3, 40], [60, 77, 3, 21], [27, 96, 36, 3]]
-    ),
-    lines: [[2, 48, 31, 62, 1.6]],
-    pins: [
-      { x: 0, y: 40, w: 30, h: 2, dir: 'left' },
-      { x: 26, y: 44, w: 24, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 4, y: 8, w: 20, h: 32 },
-      { t: 'rock', x: 30, y: 12, w: 14, h: 32 },
-      { t: 'lava', x: 30, y: 80, w: 30, h: 16 },
-    ],
-    need: 0.18,
-  }));
-
-  // 10 - everything at once.
-  LEVELS.push(merge(firePit(58, 84), {
-    name: 'Grand Finale',
-    hint: 'Gap, lava, decoy. Good luck!',
-    walls: tube(6, 28, 6, 44).concat(
-      tube(36, 46, 14, 44),
-      [[0, 34, 3, 20], [33, 55, 3, 24], [46, 57, 3, 22], [33, 76, 16, 3]],
-      tube(60, 82, 64, 106),
-      tube(66, 82, 6, 40)
-    ),
-    lines: [[2, 50, 34, 55, 1.6], [48, 57, 68, 61, 1.6]],
-    drains: [{ x: 36, y: 68, w: 10, h: 8 }],
-    pins: [
-      { x: 0, y: 40, w: 31, h: 2, dir: 'left' },
-      { x: 31, y: 42, w: 22, h: 2, dir: 'left' },
-      { x: 60, y: 36, w: 30, h: 2, dir: 'right' },
-      { x: 54, y: 100, w: 36, h: 2, dir: 'right' },
-    ],
-    fills: [
-      { t: 'water', x: 6, y: 10, w: 22, h: 30 },
-      { t: 'rock', x: 36, y: 18, w: 10, h: 24 },
-      { t: 'lava', x: 66, y: 12, w: 16, h: 24 },
-      { t: 'lava', x: 60, y: 84, w: 22, h: 16 },
-    ],
-    need: 0.3,
-  }));
-
-  for (const lv of LEVELS) shift(lv, MARGIN);
-
-  function shift(lv, dx) {
-    lv.walls = lv.walls.map((r) => [r[0] + dx, r[1], r[2], r[3]]);
-    lv.lines = lv.lines.map((l) => [l[0] + dx, l[1], l[2] + dx, l[3], l[4]]);
-    for (const k of ['pins', 'fills', 'drains']) lv[k] = lv[k].map((o) => Object.assign({}, o, { x: o.x + dx }));
-    lv.fire = Object.assign({}, lv.fire, { x: lv.fire.x + dx });
-  }
-
-  return_export();
-
-  function return_export() {
-    const api = { LEVELS };
-    if (typeof module !== 'undefined' && module.exports) module.exports = api;
-    else root.FlameLevels = api;
-  }
+  const LEVELS = [{"name":"First Drop","seed":198,"need":0.53,"walls":[[15,26,3,63],[42,26,3,63],[55,15,3,74],[82,15,3,74],[0,147,100,3],[15,108,3,39],[42,108,3,39]],"lines":[[84,89,39,105,1.6]],"pins":[{"x":13,"y":85,"w":31,"h":2,"dir":"left"},{"x":56,"y":44,"w":31,"h":2,"dir":"right"},{"x":56,"y":64,"w":31,"h":2,"dir":"right"},{"x":56,"y":85,"w":31,"h":2,"dir":"right"},{"x":13,"y":124,"w":31,"h":2,"dir":"left"}],"fills":[{"t":"water","x":18,"y":50,"w":24,"h":35},{"t":"water","x":58,"y":30,"w":24,"h":14},{"t":"lava","x":58,"y":54,"w":24,"h":10}],"fires":[{"x":18,"y":130,"w":24,"h":17}],"hint":"Water puts out fire. Lava makes it bigger. Water turns lava into stone.","tutorialPin":4},{"name":"Hot Seat","seed":154,"need":0.35,"walls":[[8,14,3,76],[29,14,3,76],[38,29,3,61],[59,29,3,61],[68,13,3,77],[89,13,3,77],[0,147,100,3],[8,108,3,39],[29,108,3,39],[68,118,3,29],[89,118,3,29]],"lines":[[61,90,26,105,1.6]],"pins":[{"x":6,"y":86,"w":25,"h":2,"dir":"left"},{"x":39,"y":65,"w":25,"h":2,"dir":"right"},{"x":39,"y":86,"w":25,"h":2,"dir":"right"},{"x":69,"y":86,"w":25,"h":2,"dir":"right"},{"x":6,"y":124,"w":25,"h":2,"dir":"left"}],"fills":[{"t":"water","x":11,"y":30,"w":18,"h":56},{"t":"water","x":41,"y":48,"w":18,"h":17},{"t":"lava","x":41,"y":71,"w":18,"h":15}],"fires":[{"x":11,"y":130,"w":18,"h":17}],"drains":[{"x":71,"y":132,"w":18,"h":15}]},{"name":"Cool Head","seed":474,"need":0.33,"walls":[[15,28,3,64],[42,28,3,64],[55,8,3,84],[82,8,3,84],[0,147,100,3],[55,118,3,29],[82,118,3,29]],"lines":[[16,92,61,115,1.6]],"pins":[{"x":13,"y":50,"w":31,"h":2,"dir":"left"},{"x":13,"y":69,"w":31,"h":2,"dir":"left"},{"x":13,"y":88,"w":31,"h":2,"dir":"left"},{"x":56,"y":44,"w":31,"h":2,"dir":"right"},{"x":56,"y":88,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"lava","x":18,"y":37,"w":24,"h":13},{"t":"lava","x":18,"y":59,"w":24,"h":10},{"t":"lava","x":18,"y":79,"w":24,"h":9},{"t":"water","x":58,"y":22,"w":24,"h":22}],"fires":[{"x":58,"y":128,"w":24,"h":19}]},{"name":"Steam Room","seed":775,"need":0.52,"walls":[[15,27,3,65],[42,27,3,65],[55,19,3,73],[82,19,3,73],[0,147,100,3],[55,108,3,39],[82,108,3,39]],"lines":[[16,92,61,105,1.6]],"pins":[{"x":13,"y":88,"w":31,"h":2,"dir":"left"},{"x":56,"y":42,"w":31,"h":2,"dir":"right"},{"x":56,"y":66,"w":31,"h":2,"dir":"right"},{"x":56,"y":88,"w":31,"h":2,"dir":"right"},{"x":56,"y":124,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"water","x":18,"y":38,"w":24,"h":50},{"t":"lava","x":58,"y":26,"w":24,"h":16},{"t":"water","x":58,"y":77,"w":24,"h":11}],"fires":[{"x":58,"y":130,"w":24,"h":17}]},{"name":"Simmer Down","seed":579,"need":0.56,"walls":[[8,19,3,75],[29,19,3,75],[38,7,3,87],[59,7,3,87],[68,27,3,67],[89,27,3,67],[0,147,100,3],[38,108,3,39],[59,108,3,39]],"lines":[[9,94,44,105,1.6],[91,94,56,105,1.6]],"pins":[{"x":6,"y":90,"w":25,"h":2,"dir":"left"},{"x":36,"y":90,"w":25,"h":2,"dir":"left"},{"x":69,"y":50,"w":25,"h":2,"dir":"right"},{"x":69,"y":90,"w":25,"h":2,"dir":"right"},{"x":36,"y":124,"w":25,"h":2,"dir":"left"}],"fills":[{"t":"water","x":11,"y":42,"w":18,"h":48},{"t":"water","x":41,"y":24,"w":18,"h":66},{"t":"lava","x":71,"y":38,"w":18,"h":12},{"t":"lava","x":71,"y":60,"w":18,"h":30}],"fires":[{"x":41,"y":130,"w":18,"h":17}]},{"name":"Lava Lamp","seed":600,"need":0.45,"walls":[[15,29,3,67],[42,29,3,67],[55,25,3,71],[82,25,3,71],[0,147,100,3],[55,108,3,39],[82,108,3,39]],"lines":[[16,96,61,105,1.6]],"pins":[{"x":13,"y":63,"w":31,"h":2,"dir":"left"},{"x":13,"y":92,"w":31,"h":2,"dir":"left"},{"x":56,"y":92,"w":31,"h":2,"dir":"right"},{"x":56,"y":124,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"lava","x":18,"y":35,"w":24,"h":28},{"t":"lava","x":18,"y":75,"w":24,"h":17},{"t":"water","x":58,"y":43,"w":24,"h":49}],"fires":[{"x":58,"y":130,"w":24,"h":17}]},{"name":"Dry Run","seed":599,"need":0.55,"walls":[[15,11,3,82],[42,11,3,82],[55,7,3,86],[82,7,3,86],[0,147,100,3],[55,108,3,39],[82,108,3,39]],"lines":[[16,93,61,105,1.6]],"pins":[{"x":13,"y":51,"w":31,"h":2,"dir":"left"},{"x":13,"y":89,"w":31,"h":2,"dir":"left"},{"x":56,"y":44,"w":31,"h":2,"dir":"right"},{"x":56,"y":89,"w":31,"h":2,"dir":"right"},{"x":56,"y":124,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"water","x":18,"y":32,"w":24,"h":19},{"t":"lava","x":58,"y":22,"w":24,"h":22}],"fires":[{"x":58,"y":130,"w":24,"h":17}]},{"name":"Fizzle","seed":451,"need":0.63,"walls":[[15,23,3,70],[42,23,3,70],[55,16,3,77],[82,16,3,77],[0,147,100,3],[15,118,3,29],[42,118,3,29]],"lines":[[84,93,39,115,1.6]],"pins":[{"x":13,"y":44,"w":31,"h":2,"dir":"left"},{"x":13,"y":89,"w":31,"h":2,"dir":"left"},{"x":56,"y":38,"w":31,"h":2,"dir":"right"},{"x":56,"y":64,"w":31,"h":2,"dir":"right"},{"x":56,"y":89,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"water","x":18,"y":33,"w":24,"h":11},{"t":"lava","x":58,"y":26,"w":24,"h":12},{"t":"lava","x":58,"y":52,"w":24,"h":12},{"t":"water","x":58,"y":76,"w":24,"h":13}],"fires":[{"x":18,"y":128,"w":24,"h":19}]},{"name":"Boiling Point","seed":526,"need":0.6,"walls":[[15,11,3,85],[42,11,3,85],[55,19,3,77],[82,19,3,77],[0,147,100,3],[55,108,3,39],[82,108,3,39]],"lines":[[16,96,61,105,1.6]],"pins":[{"x":13,"y":69,"w":31,"h":2,"dir":"left"},{"x":13,"y":92,"w":31,"h":2,"dir":"left"},{"x":56,"y":37,"w":31,"h":2,"dir":"right"},{"x":56,"y":92,"w":31,"h":2,"dir":"right"},{"x":56,"y":124,"w":31,"h":2,"dir":"right"}],"fills":[{"t":"water","x":18,"y":34,"w":24,"h":35},{"t":"water","x":18,"y":82,"w":24,"h":10},{"t":"water","x":58,"y":26,"w":24,"h":11},{"t":"lava","x":58,"y":47,"w":24,"h":45}],"fires":[{"x":58,"y":130,"w":24,"h":17}]},{"name":"Meltdown","seed":832,"need":0.53,"walls":[[8,10,3,85],[29,10,3,85],[38,8,3,87],[59,8,3,87],[68,19,3,76],[89,19,3,76],[0,147,100,3],[38,118,3,29],[59,118,3,29]],"lines":[[9,95,44,115,1.6],[91,95,56,115,1.6]],"pins":[{"x":6,"y":72,"w":25,"h":2,"dir":"left"},{"x":6,"y":91,"w":25,"h":2,"dir":"left"},{"x":36,"y":91,"w":25,"h":2,"dir":"left"},{"x":69,"y":72,"w":25,"h":2,"dir":"right"},{"x":69,"y":91,"w":25,"h":2,"dir":"right"}],"fills":[{"t":"water","x":11,"y":26,"w":18,"h":46},{"t":"lava","x":11,"y":84,"w":18,"h":7},{"t":"lava","x":41,"y":57,"w":18,"h":34},{"t":"water","x":71,"y":29,"w":18,"h":43},{"t":"lava","x":71,"y":77,"w":18,"h":14}],"fires":[{"x":41,"y":128,"w":18,"h":19}]}];
+  const api = { LEVELS };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.FlameLevels = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Flame Out - rendering, input, sound and screens.
@@ -881,6 +746,13 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
   const E = window.FlameEngine;
   const LEVELS = window.FlameLevels.LEVELS;
+  const WORLDS = [
+    { name: 'Water & Lava', what: 'Cool the lava. Don’t waste water.' },
+    { name: 'Rocks', what: 'Rocks fill holes and push water around.' },
+    { name: 'Locked Pins', what: 'Clear the jam before you pull.' },
+    { name: 'Two Fires', what: 'Share the water between the fires.' },
+    { name: 'Ice', what: 'Melt ice with lava to free the water.' },
+  ];
   const C = E.CELL;
   const LW = E.W * C, LH = E.H * C;
   const STEPS_PER_SEC = 120;
@@ -897,14 +769,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   };
 
   // ---- persistent progress (per browser, optional) ----
-  const SAVE_KEY = 'flame-out-v1';
+  const SAVE_KEY = 'flame-out-v2';
   const save = loadSave();
   function loadSave() {
     try {
       const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-      if (s && Array.isArray(s.stars)) return { unlocked: s.unlocked || 1, stars: s.stars, muted: !!s.muted };
+      if (s && Array.isArray(s.stars)) return { unlocked: s.unlocked || 1, stars: s.stars, muted: !!s.muted, musicOff: !!s.musicOff };
     } catch (e) { /* storage unavailable */ }
-    return { unlocked: 1, stars: [], muted: false };
+    return { unlocked: 1, stars: [], muted: false, musicOff: false };
   }
   function writeSave() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ }
@@ -927,7 +799,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   let drag = null;
   let endTimer = 0;
   let ended = false;
-  let fireScale = 1;
+  let fireScale = [1];
   let time = 0;
   let acc = 0;
   let last = 0;
@@ -956,17 +828,19 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     levelIndex = i;
     tries = isRetry ? tries + 1 : 1;
     const lv = LEVELS[i];
-    world = E.createWorld(lv, (Math.random() * 1e9) | 0);
-    pins = world.pins.map((p) => ({ id: p.id, offset: 0, pulled: false, alpha: 1, wiggle: 0 }));
+    world = E.createWorld(lv);
+    pins = world.pins.map((p) => ({ id: p.id, offset: 0, pulled: false, alpha: 1, wiggle: 0, locked: false }));
     fx = [];
     drag = null;
     ended = false;
     endTimer = 0;
-    fireScale = 1;
-    tutorial = i === 0;
+    fireScale = world.fires.map(() => 1);
+    tutorial = typeof lv.tutorialPin === 'number' ? lv.tutorialPin : -1;
     $('lvl-num').textContent = 'Level ' + (i + 1);
     $('lvl-name').textContent = lv.name;
-    showHint(lv.hint);
+    if (lv.hint) showHint(lv.hint);
+    else $('hint').classList.remove('show');
+    music.setWorld(worldOf(i));
     hideModal();
     drawStatic();
     updateMeter();
@@ -984,7 +858,12 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   }
 
   function updateMeter() {
-    const left = world ? Math.max(0, 1 - world.progress / world.need) : 1;
+    let left = 1;
+    if (world) {
+      let need = 0;
+      for (const f of world.fires) need += f.need;
+      left = need ? E.waterStillNeeded(world) / need : 0;
+    }
     $('meter-fill').style.transform = 'scaleX(' + left.toFixed(3) + ')';
   }
 
@@ -1116,8 +995,12 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   }
 
   function checkEnd(dt) {
-    const target = world.state === 'won' ? 0 : world.state === 'lost' && world.reason === 'lava' ? 1.7 : Math.max(0.28, 1 - world.progress / world.need);
-    fireScale += (target - fireScale) * Math.min(1, dt * 5);
+    world.fires.forEach((f, k) => {
+      const out = f.progress >= f.need;
+      const target = out || world.state === 'won' ? 0 : world.state === 'lost' && world.reason === 'lava' ? 1.7 : Math.max(0.28, 1 - f.progress / f.need);
+      fireScale[k] += (target - fireScale[k]) * Math.min(1, dt * 5);
+      if (out && !f.cheered) { f.cheered = true; if (world.fires.length > 1 && world.state === 'play') sfx.fireOut(); }
+    });
     if (ended || world.state === 'play') return;
     endTimer += dt;
     const wait = world.state === 'won' ? 1.3 : 1.1;
@@ -1153,6 +1036,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   }
 
   function updatePins(dt) {
+    for (const p of pins) if (!p.pulled) p.locked = E.isBlocked(world, p.id);
     for (const p of pins) {
       if (p.pulled) {
         p.offset += dt * 900;
@@ -1186,7 +1070,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     drawParticles();
     drawPins();
     drawFx();
-    if (tutorial && !pins[0].pulled) drawTutorialHand();
+    if (tutorial >= 0 && pins[tutorial] && !pins[tutorial].pulled) drawTutorialHand(tutorial);
   }
 
   function drawParticles() {
@@ -1261,6 +1145,37 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     // rocks and stone: chunky grains with a dark edge
     drawGrains(E.ROCK, COL.rock, COL.rockEdge);
     drawGrains(E.STONE, COL.stone, COL.stoneEdge);
+    drawIce();
+  }
+
+  function drawIce() {
+    const T = world.type, S = world.shade, W = E.W, H = E.H;
+    if (!world.iceCount) return;
+    ctx.fillStyle = '#3d74b8';
+    ctx.beginPath();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (T[y * W + x] === E.ICE) ctx.rect(x * C - 1, y * C - 1, C + 2, C + 2);
+    ctx.fill();
+    ctx.fillStyle = '#bfe9ff';
+    ctx.beginPath();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (T[y * W + x] === E.ICE) ctx.rect(x * C, y * C, C, C);
+    ctx.fill();
+    // glints and frosty top edge
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (T[i] !== E.ICE) continue;
+      if (T[i - W] !== E.ICE) ctx.rect(x * C, y * C, C, 1.6);
+      else if ((S[i] & 15) === 3) ctx.rect(x * C + 1, y * C + 1, 2, 2);
+    }
+    ctx.fill();
+    ctx.fillStyle = 'rgba(120,190,255,0.55)';
+    ctx.beginPath();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (T[i] === E.ICE && ((x + y) % 7 === 0)) ctx.rect(x * C, y * C + 2, C, 1.2);
+    }
+    ctx.fill();
   }
 
   function drawGrains(type, cols, edge) {
@@ -1312,13 +1227,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       ctx.save();
       ctx.globalAlpha = vis.alpha;
       const horiz = p.dir === 'left' || p.dir === 'right';
+      const locked = vis.locked;
       // body
       ctx.fillStyle = COL.outline;
       roundRect(ctx, g.x - 2, g.y - 2, g.w + 4, g.h + 4, 4);
       const grad = horiz ? ctx.createLinearGradient(0, g.y, 0, g.y + g.h) : ctx.createLinearGradient(g.x, 0, g.x + g.w, 0);
-      grad.addColorStop(0, COL.pinHi);
-      grad.addColorStop(0.5, COL.pin);
-      grad.addColorStop(1, COL.pinLo);
+      grad.addColorStop(0, locked ? '#e4dcef' : COL.pinHi);
+      grad.addColorStop(0.5, locked ? '#b4a9c6' : COL.pin);
+      grad.addColorStop(1, locked ? '#857a99' : COL.pinLo);
       ctx.fillStyle = grad;
       roundRect(ctx, g.x, g.y, g.w, g.h, 3);
       // handle ring
@@ -1326,18 +1242,40 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       ctx.strokeStyle = COL.outline;
       ctx.beginPath(); ctx.arc(g.hx, g.hy, 8, 0, Math.PI * 2); ctx.stroke();
       ctx.lineWidth = 5;
-      ctx.strokeStyle = COL.pin;
+      ctx.strokeStyle = locked ? '#b4a9c6' : COL.pin;
       ctx.beginPath(); ctx.arc(g.hx, g.hy, 8, 0, Math.PI * 2); ctx.stroke();
       ctx.lineWidth = 1.6;
-      ctx.strokeStyle = COL.pinHi;
+      ctx.strokeStyle = locked ? '#e4dcef' : COL.pinHi;
       ctx.beginPath(); ctx.arc(g.hx, g.hy, 8, Math.PI * 1.1, Math.PI * 1.7); ctx.stroke();
+      if (locked && !vis.pulled) drawPadlock(g.hx, g.hy - (horiz ? 15 : 0) + (horiz ? 0 : -2), vis.wiggle);
       ctx.restore();
     }
   }
 
+  function drawPadlock(x, y, wiggle) {
+    const sh = wiggle > 0 ? Math.sin(wiggle * 50) * 2.5 : 0;
+    ctx.save();
+    ctx.translate(x + sh, y);
+    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = COL.outline;
+    ctx.beginPath(); ctx.arc(0, -3, 4.5, Math.PI, 0); ctx.stroke();
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = '#d9d2e6';
+    ctx.beginPath(); ctx.arc(0, -3, 4.5, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = COL.outline;
+    roundRect(ctx, -7.5, -4, 15, 12, 3);
+    ctx.fillStyle = '#ffb02e';
+    roundRect(ctx, -5.5, -2, 11, 8, 2);
+    ctx.fillStyle = COL.outline;
+    ctx.beginPath(); ctx.arc(0, 1.5, 1.6, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
   function drawFire() {
-    const f = LEVELS[levelIndex].fire;
-    if (!f) return;
+    world.fires.forEach((f, k) => drawOneFire(f, fireScale[k]));
+  }
+
+  function drawOneFire(f, s) {
     const x = f.x * C, y = f.y * C, w = f.w * C, h = f.h * C;
     const cx = x + w / 2, by = y + h - 8;
 
@@ -1359,7 +1297,6 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     }
     ctx.restore();
 
-    const s = fireScale;
     if (s < 0.02) {
       // a happy little smoke puff once it is out
       ctx.fillStyle = 'rgba(230,230,250,0.5)';
@@ -1394,7 +1331,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
     // face
     const angry = world.state === 'lost' && world.reason === 'lava';
-    const worried = world.progress > 0 && !angry;
+    const worried = f.progress > 0 && !angry;
     const ey = by - fh * 0.3, ex = fw * 0.16, er = Math.max(1.5, fw * 0.09);
     ctx.fillStyle = '#fff';
     for (const sgn of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sgn * ex, ey, er, er * 1.25, 0, 0, Math.PI * 2); ctx.fill(); }
@@ -1442,29 +1379,28 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     }
   }
 
-  function drawTutorialHand() {
-    const p = world.pins[0];
-    const g = pinGeom(p, pins[0]);
+  function drawTutorialHand(id) {
+    const p = world.pins[id];
+    const g = pinGeom(p, pins[id]);
     const t = (time % 1.8) / 1.8;
     const ease = t < 0.15 ? 0 : t > 0.75 ? 1 : (t - 0.15) / 0.6;
-    const x = g.hx - ease * 60, y = g.hy + 14;
-    ctx.save();
-    ctx.globalAlpha = t > 0.85 ? (1 - t) / 0.15 : Math.min(1, t / 0.1);
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.strokeStyle = COL.outline;
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = COL.outline;
-    ctx.beginPath();
-    ctx.moveTo(x - 20, y); ctx.lineTo(x - 14, y - 5); ctx.lineTo(x - 14, y + 5); ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+    const ux = p.dir === 'left' ? -1 : p.dir === 'right' ? 1 : 0;
+    const uy = p.dir === 'up' ? -1 : p.dir === 'down' ? 1 : 0;
+    const ox = uy ? 14 : 0, oy = ux ? 14 : 0;
+    const x = g.hx + ox + ux * ease * 60, y = g.hy + oy + uy * ease * 60;
     ctx.save();
     ctx.globalAlpha = 0.85 * (1 - ease);
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 3;
     ctx.setLineDash([4, 6]);
-    ctx.beginPath(); ctx.moveTo(g.hx - 14, g.hy + 14); ctx.lineTo(g.hx - 72, g.hy + 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g.hx + ox + ux * 14, g.hy + oy + uy * 14); ctx.lineTo(g.hx + ox + ux * 72, g.hy + oy + uy * 72); ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = t > 0.85 ? (1 - t) / 0.15 : Math.min(1, t / 0.1);
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.strokeStyle = COL.outline;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
 
@@ -1508,6 +1444,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     drag.moved = Math.max(drag.moved, Math.hypot(dx, dy));
     const along = p.dir === 'left' ? -dx : p.dir === 'right' ? dx : p.dir === 'up' ? -dy : dy;
     const vis = pins[drag.id];
+    if (vis.locked) { vis.offset = Math.min(3, Math.max(0, along)); return; }
     vis.offset = Math.max(0, along);
     if (vis.offset > 26) pull(drag.id);
   });
@@ -1515,11 +1452,19 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   const endDrag = (e) => {
     if (!drag || e.pointerId !== drag.pointer) return;
     const vis = pins[drag.id];
-    if (!vis.pulled && drag.moved < 8) pull(drag.id); // a tap pulls too
+    if (vis.locked) lockedNudge(vis);
+    else if (!vis.pulled && drag.moved < 8) pull(drag.id); // a tap pulls too
     drag = null;
   };
   cv.addEventListener('pointerup', endDrag);
   cv.addEventListener('pointercancel', (e) => { if (drag && e.pointerId === drag.pointer) drag = null; });
+
+  let lockHintShown = false;
+  function lockedNudge(vis) {
+    vis.wiggle = 0.35;
+    sfx.clunk();
+    if (!lockHintShown) { lockHintShown = true; showHint('Locked! Clear what is jamming the handle first.'); }
+  }
 
   function pull(id) {
     const vis = pins[id];
@@ -1527,7 +1472,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     if (!E.pullPin(world, id)) return;
     vis.pulled = true;
     drag = null;
-    if (id === 0) tutorial = false;
+    if (id === tutorial) tutorial = -1;
     sfx.pull();
     try { navigator.vibrate && navigator.vibrate(18); } catch (e) { /* ignore */ }
   }
@@ -1541,21 +1486,35 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   function buildLevelGrid() {
     const grid = $('level-grid');
     grid.innerHTML = '';
-    LEVELS.forEach((lv, i) => {
-      const b = document.createElement('button');
-      b.className = 'lvl-btn';
-      const locked = i + 1 > save.unlocked;
-      b.disabled = locked;
-      b.setAttribute('aria-label', locked ? 'Level ' + (i + 1) + ', locked' : 'Level ' + (i + 1) + ', ' + lv.name);
-      const stars = save.stars[i] || 0;
-      b.innerHTML = locked
-        ? '<span class="lvl-n">' + (i + 1) + '</span>' + lockSvg()
-        : '<span class="lvl-n">' + (i + 1) + '</span><span class="lvl-stars">' + [0, 1, 2].map((k) => starSvg(k < stars)).join('') + '</span>';
-      if (i >= 5 && !locked) b.classList.add('rocky');
-      b.addEventListener('click', () => { sfx.unlock(); sfx.tap(); show(null); startLevel(i); });
-      grid.appendChild(b);
+    WORLDS.forEach((wd, wi) => {
+      const head = document.createElement('div');
+      head.className = 'world-head w' + (wi + 1);
+      head.innerHTML = '<span class="world-n">World ' + (wi + 1) + '</span><span class="world-name">' + wd.name + '</span><span class="world-what">' + wd.what + '</span>';
+      grid.appendChild(head);
+      const row = document.createElement('div');
+      row.className = 'world-levels';
+      for (let i = wi * 10; i < Math.min(LEVELS.length, wi * 10 + 10); i++) {
+        const lv = LEVELS[i];
+        const b = document.createElement('button');
+        b.className = 'lvl-btn w' + (wi + 1);
+        const locked = i + 1 > save.unlocked;
+        b.disabled = locked;
+        b.setAttribute('aria-label', locked ? 'Level ' + (i + 1) + ', locked' : 'Level ' + (i + 1) + ', ' + lv.name);
+        const stars = save.stars[i] || 0;
+        b.innerHTML = locked
+          ? '<span class="lvl-n">' + (i + 1) + '</span>' + lockSvg()
+          : '<span class="lvl-n">' + (i + 1) + '</span><span class="lvl-stars">' + [0, 1, 2].map((k) => starSvg(k < stars)).join('') + '</span>';
+        b.addEventListener('click', () => { sfx.unlock(); music.start(); sfx.tap(); show(null); startLevel(i); });
+        row.appendChild(b);
+      }
+      grid.appendChild(row);
     });
+    const cur = grid.querySelectorAll('.lvl-btn:not([disabled])');
+    const last = cur[cur.length - 1];
+    if (last) setTimeout(() => last.scrollIntoView({ block: 'center' }), 0);
   }
+
+  function worldOf(i) { return Math.min(WORLDS.length - 1, Math.floor(i / 10)); }
 
   function starSvg(on) {
     return '<svg viewBox="0 0 24 24" class="star' + (on ? ' on' : '') + '" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>';
@@ -1577,7 +1536,13 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       sub: last ? 'Every fire is out. More levels are on the way.' : stars === 3 ? 'First try. Perfect!' : 'Try it first time for 3 stars.',
       stars,
       primary: last ? 'Pick a level' : 'Next level',
-      onPrimary: () => { if (last) { buildLevelGrid(); hideModal(); show('scr-levels'); } else startLevel(levelIndex + 1); },
+      onPrimary: () => {
+        if (last) { buildLevelGrid(); hideModal(); show('scr-levels'); return; }
+        const next = levelIndex + 1;
+        // An ad break after every third level completed.
+        if (next % 3 === 0) { hideModal(); running = false; Ads.showBreak(() => { running = true; startLevel(next); }); }
+        else startLevel(next);
+      },
       secondary: 'Replay',
       onSecondary: () => startLevel(levelIndex),
     });
@@ -1591,8 +1556,8 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   function onLose() {
     const why = {
       lava: ['Too hot!', 'The lava reached the fire. Cool it with water first.'],
-      water: ['Out of water', 'Not enough water is left to reach the fire.'],
-      stuck: ['Stuck!', 'The water could not reach the fire.'],
+      water: ['Out of water', world.fires.length > 1 ? 'Not enough water is left for every fire.' : 'Not enough water is left to reach the fire.'],
+      stuck: ['Stuck!', world.fires.length > 1 ? 'Every fire needs water. One is still burning.' : 'The water could not reach the fire.'],
     }[world.reason] || ['Oops', 'Give it another go.'];
     openModal({
       win: false,
@@ -1634,12 +1599,12 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   });
   $('btn-menu').addEventListener('click', () => { sfx.unlock(); sfx.tap(); hideModal(); buildLevelGrid(); show('scr-levels'); });
   $('btn-play').addEventListener('click', () => {
-    sfx.unlock(); sfx.tap();
+    sfx.unlock(); music.start(); sfx.tap();
     show(null);
     const next = Math.min(save.unlocked, LEVELS.length) - 1;
     startLevel(next);
   });
-  $('btn-levels').addEventListener('click', () => { sfx.unlock(); sfx.tap(); buildLevelGrid(); show('scr-levels'); });
+  $('btn-levels').addEventListener('click', () => { sfx.unlock(); music.start(); sfx.tap(); buildLevelGrid(); show('scr-levels'); });
   $('btn-back').addEventListener('click', () => { sfx.tap(); show('scr-title'); });
   $('btn-sound').addEventListener('click', () => {
     save.muted = !save.muted;
@@ -1648,9 +1613,18 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     sfx.unlock();
     sfx.tap();
   });
+  $('btn-music').addEventListener('click', () => {
+    save.musicOff = !save.musicOff;
+    writeSave();
+    syncSoundBtn();
+    sfx.unlock();
+    if (save.musicOff) music.stop(); else music.start();
+  });
   function syncSoundBtn() {
     $('btn-sound').classList.toggle('muted', save.muted);
-    $('btn-sound').setAttribute('aria-label', save.muted ? 'Turn sound on' : 'Turn sound off');
+    $('btn-sound').setAttribute('aria-label', save.muted ? 'Turn sound effects on' : 'Turn sound effects off');
+    $('btn-music').classList.toggle('muted', !!save.musicOff);
+    $('btn-music').setAttribute('aria-label', save.musicOff ? 'Turn music on' : 'Turn music off');
   }
 
   // ---- sound (synthesised, no files) ----
@@ -1694,6 +1668,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     }
     return {
       unlock,
+      ctx: () => ac,
+      noise: () => noise,
+      clunk() { tone(140, 0.12, 'square', 0.1, 0, 90); tone(90, 0.1, 'triangle', 0.12, 0.02); },
+      fireOut() { [784, 1047].forEach((f, i) => tone(f, 0.16, 'triangle', 0.13, i * 0.09)); },
       tap() { tone(660, 0.07, 'triangle', 0.12); },
       pull() { hiss(0.18, 2400, 0.25, 0.8); tone(420, 0.16, 'square', 0.07, 0, 980); },
       sizzle(n) {
@@ -1716,11 +1694,154 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     };
   })();
 
+  // ---- music (generated live, no audio files) ----
+  const music = (function () {
+    const BPM = 116;
+    const STEP = 60 / BPM / 2; // eighth notes
+    const CHORDS = [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]]; // C G Am F
+    const ROOTS = [0, 7, 9, 5];
+    const R = null;
+    const MEL_A = [4, 7, 4, 0, 2, 4, 7, R, 2, -1, 2, 7, 5, 2, -1, R, 0, 4, 9, 7, 4, 0, 4, R, 5, 9, 7, 5, 4, 2, 0, R];
+    const MEL_B = [12, R, 11, 9, 7, R, 4, 7, 11, R, 9, 7, 2, R, 7, R, 9, R, 7, 4, 0, R, 4, 9, 9, 7, 5, 4, 5, 7, R, R];
+    const KEYS = [0, 2, -3, 5, -1]; // each world sits in its own key
+    let timer = null, next = 0, i = 0, out = null, key = 0, playing = false, ducked = false;
+
+    const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function note(ac, t, m, dur, type, vol) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(hz(m), t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(out);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+    function drum(ac, t, kind) {
+      if (kind === 'kick') {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.frequency.setValueAtTime(150, t);
+        o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+        g.gain.setValueAtTime(0.5, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        o.connect(g).connect(out);
+        o.start(t); o.stop(t + 0.18);
+        return;
+      }
+      const nb = sfx.noise();
+      if (!nb) return;
+      const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      s.buffer = nb;
+      f.type = kind === 'hat' ? 'highpass' : 'bandpass';
+      f.frequency.value = kind === 'hat' ? 7000 : 1800;
+      const v = kind === 'hat' ? 0.05 : 0.18, d = kind === 'hat' ? 0.04 : 0.12;
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      s.connect(f).connect(g).connect(out);
+      s.start(t, Math.random() * 0.3); s.stop(t + d + 0.01);
+    }
+    function play(ac, n, t) {
+      const bar = Math.floor(n / 8) % 4, s8 = n % 8, base = 60 + KEYS[key];
+      if (s8 === 0 || s8 === 3 || s8 === 4 || s8 === 6) note(ac, t, base - 24 + ROOTS[bar] + (s8 === 4 ? 12 : 0), STEP * 1.5, 'triangle', 0.2);
+      if (s8 === 2 || s8 === 6) for (const c of CHORDS[bar]) note(ac, t, base + c, STEP * 0.8, 'square', 0.022);
+      const mel = n < 32 ? MEL_A : MEL_B;
+      const m = mel[n % 32];
+      if (m !== null) note(ac, t, base + 12 + m, STEP * 1.3, 'triangle', 0.085);
+      if (s8 === 0 || s8 === 5) drum(ac, t, 'kick');
+      if (s8 === 4) drum(ac, t, 'snare');
+      drum(ac, t, 'hat');
+    }
+    function tick() {
+      const ac = sfx.ctx();
+      if (!ac || !out) return;
+      if (next < ac.currentTime - 0.2) next = ac.currentTime + 0.05; // tab was asleep
+      while (next < ac.currentTime + 0.18) {
+        play(ac, i, next);
+        next += STEP;
+        i = (i + 1) % 64;
+      }
+    }
+    function level() { return ducked ? 0.0001 : 0.55; }
+    return {
+      start() {
+        if (save.musicOff || playing) return;
+        const ac = sfx.ctx();
+        if (!ac) return;
+        playing = true;
+        out = ac.createGain();
+        out.gain.value = 0.0001;
+        out.gain.setTargetAtTime(level(), ac.currentTime, 0.3);
+        out.connect(ac.destination);
+        next = ac.currentTime + 0.08;
+        timer = setInterval(tick, 40);
+      },
+      stop() {
+        if (!playing) return;
+        playing = false;
+        clearInterval(timer);
+        const ac = sfx.ctx(), g = out;
+        out = null;
+        if (ac && g) { g.gain.setTargetAtTime(0.0001, ac.currentTime, 0.08); setTimeout(() => g.disconnect(), 500); }
+      },
+      setWorld(k) { key = k; },
+      duck(on) {
+        ducked = on;
+        const ac = sfx.ctx();
+        if (ac && out) out.gain.setTargetAtTime(level(), ac.currentTime, 0.15);
+      },
+    };
+  })();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) music.stop(); else if (running || !$('scr-title').hidden) music.start();
+  });
+
+  // ---- ad breaks ----
+  // To show real ads, define window.FlameAdProvider = { showBreak(done) { ...; done(); } }
+  // before this script runs (see game/README.md). Until then a placeholder break is shown.
+  const Ads = {
+    showBreak(done) {
+      music.duck(true);
+      const finish = () => { music.duck(false); done(); };
+      const provider = window.FlameAdProvider;
+      if (provider && typeof provider.showBreak === 'function') {
+        try { provider.showBreak(finish); return; } catch (e) { /* fall back to the placeholder */ }
+      }
+      const box = $('adbreak'), btn = $('ad-continue'), count = $('ad-count');
+      let left = 5;
+      btn.disabled = true;
+      count.textContent = left;
+      btn.textContent = 'Continue in ' + left;
+      box.hidden = false;
+      const iv = setInterval(() => {
+        left--;
+        count.textContent = Math.max(0, left);
+        if (left > 0) { btn.textContent = 'Continue in ' + left; return; }
+        clearInterval(iv);
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+        btn.focus({ preventScroll: true });
+      }, 1000);
+      btn.onclick = () => { if (btn.disabled) return; sfx.tap(); box.hidden = true; finish(); };
+    },
+  };
+
   // ---- boot ----
   window.addEventListener('resize', resize);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   syncSoundBtn();
+
+  // Test hook: open the page with #debug to get window.flameDebug in the console.
+  if (location.hash === '#debug') {
+    window.flameDebug = {
+      win() { if (world) { world.fires.forEach((f) => { f.progress = f.need; }); world.state = 'won'; } },
+      level: (i) => { show(null); startLevel(i); },
+      unlockAll() { save.unlocked = LEVELS.length; writeSave(); },
+      adBreak: () => Ads.showBreak(() => { window.flameDebug.adDone = true; }),
+      musicOn: () => { sfx.unlock(); music.start(); },
+    };
+  }
 
   function boot(data) {
     resize();

@@ -53,10 +53,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 .hud {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px 8px;
+  gap: 8px;
+  padding: 10px 12px 8px;
   padding-top: max(10px, env(safe-area-inset-top, 0px));
 }
 .icon-btn {
@@ -72,9 +72,9 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 .icon-btn svg { width: 24px; height: 24px; fill: var(--ink); stroke: var(--ink); }
 .icon-btn.alt { background: var(--lilac); }
-#btn-sound .off { display: none; }
-#btn-sound.muted .on { display: none; }
-#btn-sound.muted .off { display: block; }
+#btn-sound .off, #btn-music .off { display: none; }
+#btn-sound.muted .on, #btn-music.muted .on { display: none; }
+#btn-sound.muted .off, #btn-music.muted .off { display: block; }
 
 .hud-mid { min-width: 0; display: grid; gap: 4px; }
 .lvl { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
@@ -178,9 +178,15 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .btn.ghost { background: var(--lilac); font-size: 22px; min-width: 180px; }
 .btn-col { display: grid; gap: 14px; justify-items: center; }
 
-.levels-wrap { display: grid; gap: 18px; justify-items: center; width: min(420px, 100%); }
+.levels-wrap { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; justify-items: center; width: min(440px, 100%); height: 100%; min-height: 0; }
+#scr-levels { place-items: stretch center; padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); }
 .levels-wrap h2 { margin: 0; font-family: var(--font-display); font-size: 40px; color: var(--gold); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
-#level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; }
+#level-grid { width: 100%; min-height: 0; overflow-y: auto; display: grid; gap: 10px; align-content: start; padding: 4px 4px 12px; -webkit-overflow-scrolling: touch; }
+.world-levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 8px; }
+.world-head { display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: baseline; padding: 6px 2px 0; }
+.world-n { font-family: var(--font-display); font-size: 22px; color: var(--gold); text-shadow: 0 2px 0 var(--ink); }
+.world-name { font-weight: 800; font-size: 18px; }
+.world-what { grid-column: 1 / -1; font-size: 14px; font-weight: 600; opacity: .8; }
 .lvl-btn {
   aspect-ratio: 1 / 1.15;
   max-width: 100%;
@@ -195,7 +201,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   gap: 2px;
   padding: 4px 2px;
 }
-.lvl-btn.rocky { background: linear-gradient(#ffb067, #ff6a2a); }
+.lvl-btn.w2 { background: linear-gradient(#c2a58c, #8d6e57); }
+.lvl-btn.w3 { background: linear-gradient(#ffd56b, #e59a12); }
+.lvl-btn.w4 { background: linear-gradient(#ffb067, #ff5a2a); }
+.lvl-btn.w5 { background: linear-gradient(#bdf0ff, #5fb8f0); }
 .lvl-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
 .lvl-btn:disabled { background: #4a3a7a; color: #a596d6; cursor: default; box-shadow: 0 5px 0 var(--ink); transform: none; }
 .lvl-n { font-family: var(--font-display); font-size: 28px; line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
@@ -237,11 +246,23 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .card .btn { min-width: 0; width: 100%; }
 .card .btn.ghost { font-size: 20px; }
 
+.adbreak { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 24px 16px; background: rgba(15, 9, 38, .92); }
+.ad-card { width: min(340px, 100%); display: grid; gap: 14px; justify-items: center; text-align: center; }
+.ad-label { margin: 0; font-family: var(--font-display); font-size: 30px; color: var(--gold); text-shadow: 0 3px 0 var(--ink); }
+.ad-slot { width: 100%; aspect-ratio: 4 / 3; max-width: 100%; border-radius: 20px; border: 3px dashed var(--lilac); display: grid; place-items: center; align-content: center; gap: 6px; color: var(--lilac); font-weight: 700; }
+#ad-count { font-family: var(--font-display); font-size: 56px; color: var(--paper); line-height: 1; }
+.ad-note { margin: 0; font-size: 14px; opacity: .75; max-width: 30ch; }
+.btn:disabled { opacity: .55; animation: none; }
 @keyframes pulse { 50% { transform: scale(1.05); } }
 @keyframes bob { 50% { transform: translateY(-8px) rotate(3deg); } }
 @keyframes pop { from { transform: scale(.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .btn.big, .logo-flame, .card, #modal-stars .star { animation: none; }
+}
+@media (max-width: 360px) {
+  .icon-btn { width: 38px; height: 38px; border-radius: 12px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  #lvl-name { display: none; }
 }
 @media (max-height: 640px) {
   .logo { font-size: 54px; }
@@ -259,7 +280,11 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       <div class="lvl"><span id="lvl-num">Level 1</span><span id="lvl-name">First Splash</span></div>
       <div class="meter" role="img" aria-label="How much fire is left"><div id="meter-fill"></div></div>
     </div>
-    <button id="btn-sound" class="icon-btn alt" aria-label="Turn sound off">
+    <button id="btn-music" class="icon-btn alt" aria-label="Turn music off">
+      <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5l11-2v12.5" fill="none" stroke-width="2.4" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="3"/><circle cx="17.5" cy="15.5" r="3"/></svg>
+      <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5l11-2v12.5" fill="none" stroke-width="2.4" stroke-linejoin="round" opacity=".45"/><circle cx="6.5" cy="17.5" r="3" opacity=".45"/><circle cx="17.5" cy="15.5" r="3" opacity=".45"/><path d="M3 3l18 18" fill="none" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </button>
+    <button id="btn-sound" class="icon-btn alt" aria-label="Turn sound effects off">
       <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="2.2" stroke-linecap="round"/></svg>
       <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg>
     </button>
@@ -296,7 +321,6 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     <div class="levels-wrap">
       <h2>Levels</h2>
       <div id="level-grid"></div>
-      <p class="legend">Levels 1–5: water and lava. <b>Levels 6–10: rocks too.</b></p>
       <button id="btn-back" class="btn ghost">Back</button>
     </div>
   </section>
@@ -309,6 +333,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
       <button id="modal-primary" class="btn">Next level</button>
       <button id="modal-secondary" class="btn ghost">Replay</button>
     </div>
+  </div>
+</div>
+<div id="adbreak" class="adbreak" hidden>
+  <div class="ad-card" role="dialog" aria-modal="true" aria-labelledby="ad-label">
+    <p id="ad-label" class="ad-label">Ad break</p>
+    <div class="ad-slot"><span id="ad-count">5</span><span>Ad plays here</span></div>
+    <p class="ad-note">Placeholder: once an ad network is connected, a real ad shows here every 3 levels.</p>
+    <button id="ad-continue" class="btn" disabled>Continue in 5</button>
   </div>
 </div>
 <!--BUILD:SCRIPTS-->
